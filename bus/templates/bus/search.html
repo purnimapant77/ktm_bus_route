@@ -1,6 +1,16 @@
 {% extends 'bus/base.html' %}
-
 {% block title %}Find Route - KTM Bus Finder{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<style>
+    #search-map {
+        height: 500px;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+</style>
+{% endblock %}
 
 {% block content %}
 <div class="container mt-5">
@@ -15,7 +25,8 @@
                     <select name="from_stop" class="form-select form-select-lg" required>
                         <option value="">-- Select Starting Stop --</option>
                         {% for stop in stops %}
-                        <option value="{{ stop.id }}" {% if from_stop and from_stop.id == stop.id %}selected{% endif %}>
+                        <option value="{{ stop.id }}"
+                            {% if from_stop and from_stop.id == stop.id %}selected{% endif %}>
                             {{ stop.name }}
                         </option>
                         {% endfor %}
@@ -26,7 +37,8 @@
                     <select name="to_stop" class="form-select form-select-lg" required>
                         <option value="">-- Select Destination Stop --</option>
                         {% for stop in stops %}
-                        <option value="{{ stop.id }}" {% if to_stop and to_stop.id == stop.id %}selected{% endif %}>
+                        <option value="{{ stop.id }}"
+                            {% if to_stop and to_stop.id == stop.id %}selected{% endif %}>
                             {{ stop.name }}
                         </option>
                         {% endfor %}
@@ -48,30 +60,38 @@
     {% endif %}
 
     {% if results %}
-    <h4 class="mb-3">
-        <i class="fas fa-bus me-2 text-success"></i>
-        {{ results|length }} bus found from {{ from_stop.name }} to {{ to_stop.name }}
-    </h4>
+    <div class="row g-4">
 
-    {% for result in results %}
-    <div class="card border-0 shadow-sm mb-3">
-        <div class="card-header text-white" style="background: #1a237e;">
-            <div class="d-flex justify-content-between align-items-center">
-                <h5 class="mb-0">
-                    <i class="fas fa-bus me-2"></i>{{ result.route.yatayat_name }} — {{ result.route.route_name }}
-                </h5>
-                <span class="badge bg-light text-dark">{{ result.route.vehicle_type }}</span>
-            </div>
-        </div>
-        <div class="card-body">
-            <div class="row">
-                <div class="col-md-6">
-                    <p><i class="fas fa-sign-in-alt me-2 text-success"></i><strong>Board at:</strong> {{ result.from_stop.name }}</p>
-                    <p><i class="fas fa-sign-out-alt me-2 text-danger"></i><strong>Exit at:</strong> {{ result.to_stop.name }}</p>
-                    <p><i class="fas fa-tag me-2 text-primary"></i><strong>Route ID:</strong> {{ result.route.route_id }}</p>
+        {# Left side - Results #}
+        <div class="col-md-6">
+            <h4 class="mb-3">
+                <i class="fas fa-bus me-2 text-success"></i>
+                {{ results|length }} bus found
+            </h4>
+
+            {% for result in results %}
+            <div class="card border-0 shadow-sm mb-3">
+                <div class="card-header text-white" style="background:#1a237e;">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            <i class="fas fa-bus me-2"></i>{{ result.route.yatayat_name }}
+                        </h5>
+                        <span class="badge bg-light text-dark">{{ result.route.route_id }}</span>
+                    </div>
+                    <small>{{ result.route.route_name }}</small>
                 </div>
-                <div class="col-md-6">
-                    <p class="fw-bold"><i class="fas fa-map-marker-alt me-2"></i>Stops on this journey:</p>
+                <div class="card-body">
+                    <p class="mb-2">
+                        <i class="fas fa-sign-in-alt me-2 text-success"></i>
+                        <strong>Board at:</strong> {{ result.from_stop.name }}
+                    </p>
+                    <p class="mb-3">
+                        <i class="fas fa-sign-out-alt me-2 text-danger"></i>
+                        <strong>Exit at:</strong> {{ result.to_stop.name }}
+                    </p>
+                    <p class="fw-bold mb-2">
+                        <i class="fas fa-map-marker-alt me-2"></i>Stops on journey:
+                    </p>
                     <ol class="list-group list-group-numbered">
                         {% for rs in result.stops_in_between %}
                         <li class="list-group-item border-0 py-1
@@ -79,16 +99,86 @@
                             {% elif rs.stop == result.to_stop %}bg-danger bg-opacity-10 fw-bold
                             {% endif %}">
                             {{ rs.stop.name }}
-                            {% if rs.stop == result.from_stop %}<span class="badge bg-success ms-2">Board here</span>{% endif %}
-                            {% if rs.stop == result.to_stop %}<span class="badge bg-danger ms-2">Exit here</span>{% endif %}
+                            {% if rs.stop == result.from_stop %}
+                                <span class="badge bg-success ms-2">Board</span>
+                            {% endif %}
+                            {% if rs.stop == result.to_stop %}
+                                <span class="badge bg-danger ms-2">Exit</span>
+                            {% endif %}
                         </li>
                         {% endfor %}
                     </ol>
                 </div>
             </div>
+            {% endfor %}
         </div>
+
+        {# Right side - Map #}
+        <div class="col-md-6">
+            <h4 class="mb-3">
+                <i class="fas fa-map me-2 text-danger"></i>Route on Map
+            </h4>
+            <div id="search-map"></div>
+        </div>
+
     </div>
-    {% endfor %}
     {% endif %}
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+{% if map_data %}
+<script>
+    const data = {{ map_data|safe }};
+
+    const map = L.map('search-map').setView(
+        [data.from_stop.lat, data.from_stop.lng], 14
+    );
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+
+    // Draw route lines
+    data.routes.forEach(route => {
+        L.polyline(route.coordinates, {
+            color: route.color || 'blue',
+            weight: 5,
+            opacity: 0.8
+        }).addTo(map).bindPopup(`<strong>${route.yatayat_name}</strong><br>${route.route_name}`);
+    });
+
+    // Add stop markers
+    data.stops.forEach(stop => {
+        let color = '#1a237e';
+        let label = stop.name;
+
+        if (stop.is_from) {
+            color = '#2e7d32';
+            label += ' 🟢 Board here';
+        } else if (stop.is_to) {
+            color = '#c62828';
+            label += ' 🔴 Exit here';
+        }
+
+        const icon = L.divIcon({
+            html: `<div style="background:${color};width:14px;height:14px;border-radius:50%;border:2px solid white;box-shadow:0 2px 4px rgba(0,0,0,0.4);"></div>`,
+            iconSize: [14, 14],
+            iconAnchor: [7, 7],
+            className: ''
+        });
+
+        L.marker([stop.lat, stop.lng], {icon})
+            .addTo(map)
+            .bindPopup(`<strong>${label}</strong>`);
+    });
+
+    // Fit map to show all route stops
+    const allCoords = data.stops.map(s => [s.lat, s.lng]);
+    if (allCoords.length > 1) {
+        map.fitBounds(allCoords, {padding: [30, 30]});
+    }
+</script>
+{% endif %}
 {% endblock %}

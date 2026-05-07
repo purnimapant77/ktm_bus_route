@@ -1,0 +1,200 @@
+{% extends 'bus/base.html' %}
+
+{% block title %}Map - KTM Bus Finder{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<style>
+    #map {
+        height: 600px;
+        width: 100%;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    .route-legend {
+        background: white;
+        padding: 15px;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .legend-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 10px;
+        cursor: pointer;
+        padding: 8px;
+        border-radius: 6px;
+        border: 2px solid transparent;
+        transition: all 0.2s;
+    }
+    .legend-item:hover {
+        background: #f0f4ff;
+    }
+    .legend-item.active {
+        border-color: #1a237e;
+        background: #e8eaf6;
+    }
+    .legend-color {
+        width: 30px;
+        height: 5px;
+        border-radius: 3px;
+        margin-right: 10px;
+        flex-shrink: 0;
+    }
+    .btn-show-all {
+        font-size: 0.8rem;
+        padding: 4px 10px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4"><i class="fas fa-map me-2 text-danger"></i>Bus Routes Map</h2>
+
+    <div class="row g-4">
+        <div class="col-md-9">
+            <div id="map"></div>
+        </div>
+        <div class="col-md-3">
+            <div class="route-legend">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h6 class="fw-bold mb-0"><i class="fas fa-route me-2"></i>Routes</h6>
+                    <button class="btn btn-outline-secondary btn-show-all" onclick="showAllRoutes()">
+                        Show All
+                    </button>
+                </div>
+                <div id="legend"></div>
+            </div>
+            <div class="card border-0 shadow-sm mt-3 p-3">
+                <h6 class="fw-bold"><i class="fas fa-info-circle me-2 text-primary"></i>How to use</h6>
+                <small class="text-muted">
+                    <p class="mb-1">🔵 Pins = Bus stops</p>
+                    <p class="mb-1">Click stop to see name</p>
+                    <p class="mb-1">Click route to highlight it</p>
+                    <p class="mb-0">Click "Show All" to reset</p>
+                </small>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+    const stopsData = {{ stops_json|safe }};
+    const routesData = {{ routes_json|safe }};
+
+    // Fallback colors for routes that don't have a color set
+    const fallbackColors = ['#1565C0','#c62828','#2e7d32','#e65100','#6a1b9a','#00838f','#4e342e'];
+
+    // Initialize map centered on Kathmandu
+    const map = L.map('map').setView([27.7172, 85.3240], 13);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+
+    // Stop icon
+    const stopIcon = L.divIcon({
+        html: '<div style="background:#1a237e;width:12px;height:12px;border-radius:50%;border:2px solid white;box-shadow:0 2px 4px rgba(0,0,0,0.3);"></div>',
+        iconSize: [12, 12],
+        iconAnchor: [6, 6],
+        className: ''
+    });
+
+    // Add all stop markers
+    stopsData.forEach(stop => {
+        L.marker([stop.lat, stop.lng], {icon: stopIcon})
+            .addTo(map)
+            .bindPopup(`<strong>${stop.name}</strong>`);
+    });
+
+    // Draw routes
+    const routeLayers = {};
+    const routeColors = {};
+    const legend = document.getElementById('legend');
+    let activeItem = null;
+
+    routesData.forEach((route, index) => {
+        // Pick color: use route color if set and not generic 'blue', else fallback
+        const color = (route.color && route.color.toLowerCase() !== 'blue')
+            ? route.color
+            : fallbackColors[index % fallbackColors.length];
+
+        routeColors[route.route_id] = color;
+
+        // Draw polyline
+        const polyline = L.polyline(route.coordinates, {
+            color: color,
+            weight: 5,
+            opacity: 0.85
+        }).addTo(map);
+
+        routeLayers[route.route_id] = polyline;
+
+        // Legend item
+        const item = document.createElement('div');
+        item.className = 'legend-item';
+        item.id = 'legend-' + route.route_id;
+        item.innerHTML = `
+            <div class="legend-color" style="background:${color};"></div>
+            <div>
+                <div style="font-size:0.85rem;font-weight:600;">${route.route_id} — ${route.yatayat_name}</div>
+                <div style="font-size:0.75rem;color:#666;">${route.route_name}</div>
+            </div>
+        `;
+
+        // Click to highlight only this route
+        item.addEventListener('click', () => {
+            highlightRoute(route.route_id, item);
+        });
+
+        legend.appendChild(item);
+    });
+
+    function highlightRoute(selectedId, clickedItem) {
+        // If clicking same route again, show all
+        if (activeItem === clickedItem) {
+            showAllRoutes();
+            return;
+        }
+
+        activeItem = clickedItem;
+
+        // Dim all routes
+        Object.keys(routeLayers).forEach(id => {
+            if (id === selectedId) {
+                routeLayers[id].setStyle({opacity: 1, weight: 6});
+                routeLayers[id].addTo(map);
+            } else {
+                routeLayers[id].setStyle({opacity: 0.1, weight: 3});
+            }
+        });
+
+        // Update legend highlight
+        document.querySelectorAll('.legend-item').forEach(el => {
+            el.classList.remove('active');
+        });
+        clickedItem.classList.add('active');
+
+        // Zoom to selected route
+        map.fitBounds(routeLayers[selectedId].getBounds(), {padding: [30, 30]});
+    }
+
+    function showAllRoutes() {
+        activeItem = null;
+        Object.keys(routeLayers).forEach(id => {
+            routeLayers[id].setStyle({
+                opacity: 0.85,
+                weight: 5,
+                color: routeColors[id]
+            });
+        });
+        document.querySelectorAll('.legend-item').forEach(el => {
+            el.classList.remove('active');
+        });
+    }
+</script>
+{% endblock %}
