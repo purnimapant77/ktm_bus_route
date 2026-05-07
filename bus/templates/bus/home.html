@@ -1,0 +1,46 @@
+{% extends 'bus/base.html' %}
+
+{% block title %}Home - KTM Bus Finder{% endblock %}
+
+{% block content %}
+<div style="background: linear-gradient(135deg, #1a237e, #283593); color: white; padding: 80px 0;">
+    <div class="container text-center">
+        <h1 class="display-4 fw-bold mb-3">
+            <i class="fas fa-bus me-3"></i>KTM Bus Route Finder
+        </h1>
+        <p class="lead mb-4">Find the right bus for your journey in Kathmandu</p>
+        <a href="{% url 'search_route' %}" class="btn btn-light btn-lg px-5">
+            <i class="fas fa-search me-2"></i>Find My Bus
+        </a>
+    </div>
+</div>
+
+<div class="container mt-5">
+    <div class="row text-center g-4">
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm p-4 h-100">
+                <i class="fas fa-search fa-3x text-primary mb-3"></i>
+                <h5>Find Route</h5>
+                <p class="text-muted">Select your starting and destination stop to find the right bus</p>
+                <a href="{% url 'search_route' %}" class="btn btn-primary mt-auto">Search Now</a>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm p-4 h-100">
+                <i class="fas fa-route fa-3x text-success mb-3"></i>
+                <h5>Browse Yatayat</h5>
+                <p class="text-muted">Browse all available Yatayat services and their routes</p>
+                <a href="{% url 'yatayat_routes' %}" class="btn btn-success mt-auto">View Routes</a>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm p-4 h-100">
+                <i class="fas fa-map-marker-alt fa-3x text-danger mb-3"></i>
+                <h5>{{ stops.count }} Stops</h5>
+                <p class="text-muted">Covering major stops across Kathmandu valley</p>
+                <a href="{% url 'search_route' %}" class="btn btn-danger mt-auto">Explore</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

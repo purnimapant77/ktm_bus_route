@@ -1,0 +1,94 @@
+{% extends 'bus/base.html' %}
+
+{% block title %}Find Route - KTM Bus Finder{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="mb-4"><i class="fas fa-search me-2 text-primary"></i>Find Your Bus</h2>
+
+    <div class="card border-0 shadow-sm p-4 mb-4">
+        <form method="POST">
+            {% csrf_token %}
+            <div class="row g-3 align-items-end">
+                <div class="col-md-5">
+                    <label class="form-label fw-bold">From Stop</label>
+                    <select name="from_stop" class="form-select form-select-lg" required>
+                        <option value="">-- Select Starting Stop --</option>
+                        {% for stop in stops %}
+                        <option value="{{ stop.id }}" {% if from_stop and from_stop.id == stop.id %}selected{% endif %}>
+                            {{ stop.name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-5">
+                    <label class="form-label fw-bold">To Stop</label>
+                    <select name="to_stop" class="form-select form-select-lg" required>
+                        <option value="">-- Select Destination Stop --</option>
+                        {% for stop in stops %}
+                        <option value="{{ stop.id }}" {% if to_stop and to_stop.id == stop.id %}selected{% endif %}>
+                            {{ stop.name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary btn-lg w-100">
+                        <i class="fas fa-search me-1"></i>Search
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    {% if error %}
+    <div class="alert alert-warning">
+        <i class="fas fa-exclamation-triangle me-2"></i>{{ error }}
+    </div>
+    {% endif %}
+
+    {% if results %}
+    <h4 class="mb-3">
+        <i class="fas fa-bus me-2 text-success"></i>
+        {{ results|length }} bus found from {{ from_stop.name }} to {{ to_stop.name }}
+    </h4>
+
+    {% for result in results %}
+    <div class="card border-0 shadow-sm mb-3">
+        <div class="card-header text-white" style="background: #1a237e;">
+            <div class="d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="fas fa-bus me-2"></i>{{ result.route.yatayat_name }} — {{ result.route.route_name }}
+                </h5>
+                <span class="badge bg-light text-dark">{{ result.route.vehicle_type }}</span>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <p><i class="fas fa-sign-in-alt me-2 text-success"></i><strong>Board at:</strong> {{ result.from_stop.name }}</p>
+                    <p><i class="fas fa-sign-out-alt me-2 text-danger"></i><strong>Exit at:</strong> {{ result.to_stop.name }}</p>
+                    <p><i class="fas fa-tag me-2 text-primary"></i><strong>Route ID:</strong> {{ result.route.route_id }}</p>
+                </div>
+                <div class="col-md-6">
+                    <p class="fw-bold"><i class="fas fa-map-marker-alt me-2"></i>Stops on this journey:</p>
+                    <ol class="list-group list-group-numbered">
+                        {% for rs in result.stops_in_between %}
+                        <li class="list-group-item border-0 py-1
+                            {% if rs.stop == result.from_stop %}bg-success bg-opacity-10 fw-bold
+                            {% elif rs.stop == result.to_stop %}bg-danger bg-opacity-10 fw-bold
+                            {% endif %}">
+                            {{ rs.stop.name }}
+                            {% if rs.stop == result.from_stop %}<span class="badge bg-success ms-2">Board here</span>{% endif %}
+                            {% if rs.stop == result.to_stop %}<span class="badge bg-danger ms-2">Exit here</span>{% endif %}
+                        </li>
+                        {% endfor %}
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+    {% endif %}
+</div>
+{% endblock %}

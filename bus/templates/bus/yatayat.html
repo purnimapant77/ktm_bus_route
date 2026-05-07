@@ -1,0 +1,59 @@
+{% extends 'bus/base.html' %}
+
+{% block title %}Yatayat Routes - KTM Bus Finder{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="mb-4"><i class="fas fa-route me-2 text-success"></i>Yatayat Routes</h2>
+
+    <div class="row g-3 mb-4">
+        {% for route in routes %}
+        <div class="col-md-4">
+            <a href="?route={{ route.id }}" class="text-decoration-none">
+                <div class="card border-0 shadow-sm p-3 h-100
+                    {% if selected_route and selected_route.id == route.id %}border-primary border-2{% endif %}">
+                    <div class="d-flex align-items-center">
+                        <div class="rounded-circle text-white d-flex align-items-center justify-content-center me-3"
+                            style="width:45px;height:45px;background:#1a237e;font-weight:bold;">
+                            {{ route.route_id }}
+                        </div>
+                        <div>
+                            <h6 class="mb-0">{{ route.route_name }}</h6>
+                            <small class="text-muted">{{ route.yatayat_name }} · {{ route.vehicle_type }}</small>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% if selected_route %}
+    <div class="card border-0 shadow-sm">
+        <div class="card-header text-white" style="background:#1a237e;">
+            <h5 class="mb-0">
+                <i class="fas fa-bus me-2"></i>{{ selected_route.yatayat_name }} — {{ selected_route.route_name }}
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="d-flex flex-column">
+                {% for rs in route_stops %}
+                <div class="d-flex align-items-center mb-2">
+                    <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center me-3"
+                        style="width:32px;height:32px;min-width:32px;font-size:0.8rem;">
+                        {{ rs.stop_sequence }}
+                    </div>
+                    <div class="card border-0 bg-light px-3 py-2 w-100">
+                        {{ rs.stop.name }}
+                    </div>
+                </div>
+                {% if not forloop.last %}
+                <div class="ms-4 ps-1 border-start border-2 border-primary" style="height:15px;"></div>
+                {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
