@@ -1,0 +1,113 @@
+{% extends 'bus/base.html' %}
+{% block title %}Contact - KTM Bus Finder{% endblock %}
+
+{% block content %}
+<div style="background: linear-gradient(135deg, #1a237e, #283593); color: white; padding: 60px 0;">
+    <div class="container text-center">
+        <h1 class="fw-bold mb-3"><i class="fas fa-envelope me-3"></i>Contact Us</h1>
+        <p class="lead">Have a question or want to contribute? We'd love to hear from you!</p>
+    </div>
+</div>
+
+<div class="container mt-5">
+    <div class="row g-5">
+        <div class="col-md-7">
+            <div class="card border-0 shadow-sm p-4">
+                <h4 class="fw-bold mb-4">Send us a Message</h4>
+
+                {% if messages %}
+                    {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                    {% endfor %}
+                {% endif %}
+
+                <form method="POST">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Your Name <span class="text-danger">*</span></label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-user"></i></span>
+                            <input type="text" name="name" class="form-control" placeholder="Enter your name" required
+                                {% if user.is_authenticated %}value="{{ user.username }}"{% endif %}>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Email Address <span class="text-danger">*</span></label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                            <input type="email" name="email" class="form-control" placeholder="Enter your email" required
+                                {% if user.is_authenticated %}value="{{ user.email }}"{% endif %}>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Subject</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-tag"></i></span>
+                            <select name="subject" class="form-select">
+                                <option value="general">General Inquiry</option>
+                                <option value="route">Missing Route / Stop</option>
+                                <option value="wrong">Wrong Information</option>
+                                <option value="suggestion">Suggestion</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Message <span class="text-danger">*</span></label>
+                        <textarea name="message" class="form-control" rows="5"
+                            placeholder="Write your message here..." required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-lg w-100">
+                        <i class="fas fa-paper-plane me-2"></i>Send Message
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <div class="col-md-5">
+            <h4 class="fw-bold mb-4">Get in Touch</h4>
+            <div class="card border-0 shadow-sm p-4 mb-3">
+                <div class="d-flex align-items-center">
+                    <div class="rounded-circle bg-primary bg-opacity-10 p-3 me-3">
+                        <i class="fas fa-map-marker-alt text-primary fa-lg"></i>
+                    </div>
+                    <div>
+                        <h6 class="fw-bold mb-0">Location</h6>
+                        <small class="text-muted">Kathmandu, Nepal</small>
+                    </div>
+                </div>
+            </div>
+            <div class="card border-0 shadow-sm p-4 mb-3">
+                <div class="d-flex align-items-center">
+                    <div class="rounded-circle bg-success bg-opacity-10 p-3 me-3">
+                        <i class="fas fa-envelope text-success fa-lg"></i>
+                    </div>
+                    <div>
+                        <h6 class="fw-bold mb-0">Email</h6>
+                        <small class="text-muted">ktmbusroute@gmail.com</small>
+                    </div>
+                </div>
+            </div>
+            <div class="card border-0 shadow-sm p-4 mb-4">
+                <div class="d-flex align-items-center">
+                    <div class="rounded-circle bg-warning bg-opacity-10 p-3 me-3">
+                        <i class="fas fa-clock text-warning fa-lg"></i>
+                    </div>
+                    <div>
+                        <h6 class="fw-bold mb-0">Response Time</h6>
+                        <small class="text-muted">Within 24-48 hours</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card border-0 shadow-sm p-4" style="background:#f0f4ff;">
+                <h6 class="fw-bold mb-3"><i class="fas fa-lightbulb me-2 text-warning"></i>Want to help?</h6>
+                <p class="text-muted small mb-0">If you know bus routes or stops missing from our database, please let us know! Your contribution helps thousands of daily commuters in Kathmandu.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

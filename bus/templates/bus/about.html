@@ -1,0 +1,84 @@
+{% extends 'bus/base.html' %}
+{% block title %}About - KTM Bus Finder{% endblock %}
+
+{% block content %}
+<div style="background: linear-gradient(135deg, #1a237e, #283593); color: white; padding: 60px 0;">
+    <div class="container text-center">
+        <h1 class="fw-bold mb-3"><i class="fas fa-info-circle me-3"></i>About Us</h1>
+        <p class="lead">Making Kathmandu's public transport easier for everyone</p>
+    </div>
+</div>
+
+<div class="container mt-5">
+    <div class="row g-4 align-items-center mb-5">
+        <div class="col-md-6">
+            <h2 class="fw-bold mb-3">What is KTM Bus Finder?</h2>
+            <p class="text-muted">KTM Bus Finder is a free online platform that helps people in Kathmandu Valley find the right public bus for their journey. Simply select your starting stop and destination, and we'll tell you exactly which bus to take, where to board, and where to get off.</p>
+            <p class="text-muted">We cover major Yatayat services operating across Kathmandu, Lalitpur, and Bhaktapur with accurate route and stop information.</p>
+        </div>
+        <div class="col-md-6">
+            <div class="row g-3 text-center">
+                <div class="col-6">
+                    <div class="card border-0 shadow-sm p-4">
+                        <h2 class="fw-bold text-primary">13+</h2>
+                        <p class="text-muted mb-0">Bus Stops</p>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="card border-0 shadow-sm p-4">
+                        <h2 class="fw-bold text-success">2+</h2>
+                        <p class="text-muted mb-0">Routes</p>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="card border-0 shadow-sm p-4">
+                        <h2 class="fw-bold text-danger">Free</h2>
+                        <p class="text-muted mb-0">Always Free</p>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="card border-0 shadow-sm p-4">
+                        <h2 class="fw-bold text-warning">24/7</h2>
+                        <p class="text-muted mb-0">Available</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-5">
+        <div class="col-12">
+            <h2 class="fw-bold mb-4 text-center">What We Offer</h2>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm p-4 h-100 text-center">
+                <i class="fas fa-search fa-2x text-primary mb-3"></i>
+                <h5 class="fw-bold">Smart Route Search</h5>
+                <p class="text-muted">Find the right bus between any two stops instantly with clear boarding and exit instructions.</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm p-4 h-100 text-center">
+                <i class="fas fa-map fa-2x text-danger mb-3"></i>
+                <h5 class="fw-bold">Live Map View</h5>
+                <p class="text-muted">See all bus routes and stops on an interactive OpenStreetMap with route highlighting.</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm p-4 h-100 text-center">
+                <i class="fas fa-route fa-2x text-success mb-3"></i>
+                <h5 class="fw-bold">Yatayat Directory</h5>
+                <p class="text-muted">Browse all available Yatayat services and explore their complete route stop by stop.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm p-5 mb-5 text-center" style="background:#f0f4ff;">
+        <h4 class="fw-bold mb-3">Want to contribute data?</h4>
+        <p class="text-muted mb-3">If you know bus routes we haven't added yet, we'd love your help expanding our database for all of Kathmandu!</p>
+        <a href="{% url 'contact' %}" class="btn btn-primary px-4">
+            <i class="fas fa-envelope me-2"></i>Contact Us
+        </a>
+    </div>
+</div>
+{% endblock %}

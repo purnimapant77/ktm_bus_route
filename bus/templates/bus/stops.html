@@ -1,0 +1,30 @@
+{% extends 'bus/base.html' %}
+{% block title %}All Stops - KTM Bus Finder{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="mb-4">
+        <i class="fas fa-map-marker-alt me-2 text-danger"></i>All Bus Stops
+    </h2>
+
+    <div class="row g-3">
+        {% for stop in stops %}
+        <div class="col-md-4 col-sm-6">
+            <div class="card border-0 shadow-sm p-3 h-100">
+                <div class="d-flex align-items-center">
+                    <div class="rounded-circle bg-primary bg-opacity-10 p-3 me-3">
+                        <i class="fas fa-map-marker-alt text-primary"></i>
+                    </div>
+                    <div>
+                        <div class="fw-bold">{{ stop.name }}</div>
+                        {% if stop.alt_names %}
+                        <small class="text-muted">Also known as: {{ stop.alt_names }}</small>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

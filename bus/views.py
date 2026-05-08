@@ -158,3 +158,23 @@ def map_view(request):
         'stops_json': json.dumps(stops_data),
         'routes_json': json.dumps(routes_data),
     })
+    
+def about_view(request):
+    return render(request, 'bus/about.html')
+
+
+def contact_view(request):
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        email = request.POST.get('email')
+        message = request.POST.get('message')
+        # For now just show success message
+        # Later we can add email sending
+        from django.contrib import messages
+        messages.success(request, f'Thank you {name}! Your message has been received. We will get back to you soon.')
+        return redirect('contact')
+    return render(request, 'bus/contact.html')
+
+def stops_list(request):
+    stops = Stop.objects.all().order_by('name')
+    return render(request, 'bus/stops.html', {'stops': stops})

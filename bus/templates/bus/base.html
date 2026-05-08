@@ -59,6 +59,12 @@
     <li class="nav-item">
         <a class="nav-link" href="{% url 'map_view' %}"><i class="fas fa-map me-1"></i>Map</a>
     </li>
+    <li class="nav-item">
+    <a class="nav-link" href="{% url 'about' %}"><i class="fas fa-info-circle me-1"></i>About</a>
+</li>
+<li class="nav-item">
+    <a class="nav-link" href="{% url 'contact' %}"><i class="fas fa-envelope me-1"></i>Contact</a>
+</li>
 
     {% if user.is_authenticated %}
     <li class="nav-item dropdown ms-2">
