@@ -1,9 +1,10 @@
 {% extends 'bus/base.html' %}
-
+{% load static %}
 {% block title %}Home - KTM Bus Finder{% endblock %}
 
 {% block content %}
-<div style="background: linear-gradient(135deg, #1a237e, #283593); color: white; padding: 80px 0;">
+
+<div style="background: linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.55)), url('{% static 'bus/images/bus.jpg' %}') center/cover no-repeat; color: white; padding: 120px 0;">
     <div class="container text-center">
         <h1 class="display-4 fw-bold mb-3">
             <i class="fas fa-bus me-3"></i>KTM Bus Route Finder
@@ -43,4 +44,5 @@
         </div>
     </div>
 </div>
+
 {% endblock %}
