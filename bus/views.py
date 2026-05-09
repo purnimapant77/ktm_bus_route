@@ -1,6 +1,38 @@
 from django.shortcuts import render
 from .models import Stop, Route, RouteStop
 import json
+import math
+
+def calculate_distance(lat1, lng1, lat2, lng2):
+    """Haversine formula - calculates real distance in km between two coordinates"""
+    R = 6371  # Earth radius in km
+    lat1, lng1, lat2, lng2 = map(math.radians, [lat1, lng1, lat2, lng2])
+    dlat = lat2 - lat1
+    dlng = lng2 - lng1
+    a = math.sin(dlat/2)**2 + math.cos(lat1) * math.cos(lat2) * math.sin(dlng/2)**2
+    return R * 2 * math.asin(math.sqrt(a))
+
+
+def calculate_fare(distance_km, is_student=False):
+    """Calculate fare based on Bagmati Province fare slabs, rounded up to nearest 5"""
+    if distance_km <= 5:
+        base_fare = 24
+    elif distance_km <= 10:
+        base_fare = 33
+    elif distance_km <= 15:
+        base_fare = 39
+    elif distance_km <= 20:
+        base_fare = 44
+    else:
+        base_fare = 50
+
+    if is_student:
+        base_fare = base_fare * 0.55  # 45% discount
+
+    # Round UP to nearest 5
+    import math
+    fare = math.ceil(base_fare / 5) * 5
+    return fare
 
 def home(request):
     stops = Stop.objects.all().order_by('name')
@@ -13,10 +45,12 @@ def search_route(request):
     to_stop = None
     error = None
     map_data = None
+    is_student = False
 
     if request.method == 'POST':
         from_stop_id = request.POST.get('from_stop')
         to_stop_id = request.POST.get('to_stop')
+        is_student = request.POST.get('is_student') == 'yes'
 
         try:
             from_stop = Stop.objects.get(id=from_stop_id)
@@ -45,6 +79,22 @@ def search_route(request):
                             stop_sequence__lte=to_seq
                         ).order_by('stop_sequence')
 
+                        # Calculate total distance stop by stop
+                        stop_list = list(stops_in_between)
+                        total_distance = 0
+                        for i in range(len(stop_list) - 1):
+                            s1 = stop_list[i].stop
+                            s2 = stop_list[i+1].stop
+                            total_distance += calculate_distance(
+                                s1.latitude, s1.longitude,
+                                s2.latitude, s2.longitude
+                            )
+
+                        # Calculate fares
+                        regular_fare = calculate_fare(total_distance, is_student=False)
+                        student_fare = calculate_fare(total_distance, is_student=True)
+                        final_fare = student_fare if is_student else regular_fare
+
                         results.append({
                             'route': route,
                             'from_stop': from_stop,
@@ -52,9 +102,13 @@ def search_route(request):
                             'from_seq': from_seq,
                             'to_seq': to_seq,
                             'stops_in_between': stops_in_between,
+                            'distance': round(total_distance, 2),
+                            'regular_fare': regular_fare,
+                            'student_fare': student_fare,
+                            'final_fare': final_fare,
+                            'is_student': is_student,
                         })
 
-                        # Build map coordinates for this route segment
                         coords = []
                         for rs in stops_in_between:
                             coords.append([rs.stop.latitude, rs.stop.longitude])
@@ -97,6 +151,7 @@ def search_route(request):
         'to_stop': to_stop,
         'error': error,
         'map_data': map_data,
+        'is_student': is_student,
     })
 
 

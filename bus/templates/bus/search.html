@@ -20,7 +20,7 @@
         <form method="POST">
             {% csrf_token %}
             <div class="row g-3 align-items-end">
-                <div class="col-md-5">
+                <div class="col-md-4">
                     <label class="form-label fw-bold">From Stop</label>
                     <select name="from_stop" class="form-select form-select-lg" required>
                         <option value="">-- Select Starting Stop --</option>
@@ -32,7 +32,7 @@
                         {% endfor %}
                     </select>
                 </div>
-                <div class="col-md-5">
+                <div class="col-md-4">
                     <label class="form-label fw-bold">To Stop</label>
                     <select name="to_stop" class="form-select form-select-lg" required>
                         <option value="">-- Select Destination Stop --</option>
@@ -45,11 +45,21 @@
                     </select>
                 </div>
                 <div class="col-md-2">
+                    <label class="form-label fw-bold">Student?</label>
+                    <select name="is_student" class="form-select form-select-lg">
+                        <option value="no" {% if not is_student %}selected{% endif %}>No</option>
+                        <option value="yes" {% if is_student %}selected{% endif %}>Yes 🎓</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
                     <button type="submit" class="btn btn-primary btn-lg w-100">
                         <i class="fas fa-search me-1"></i>Search
                     </button>
                 </div>
             </div>
+            <small class="text-muted mt-2 d-block">
+                🎓 Student discount (45% off) applies with valid student uniform or ID card
+            </small>
         </form>
     </div>
 
@@ -81,14 +91,39 @@
                     <small>{{ result.route.route_name }}</small>
                 </div>
                 <div class="card-body">
-                    <p class="mb-2">
-                        <i class="fas fa-sign-in-alt me-2 text-success"></i>
-                        <strong>Board at:</strong> {{ result.from_stop.name }}
-                    </p>
-                    <p class="mb-3">
-                        <i class="fas fa-sign-out-alt me-2 text-danger"></i>
-                        <strong>Exit at:</strong> {{ result.to_stop.name }}
-                    </p>
+
+                    <div class="row mb-3">
+                        <div class="col-6">
+                            <p class="mb-2">
+                                <i class="fas fa-sign-in-alt me-2 text-success"></i>
+                                <strong>Board at:</strong><br>{{ result.from_stop.name }}
+                            </p>
+                            <p class="mb-2">
+                                <i class="fas fa-sign-out-alt me-2 text-danger"></i>
+                                <strong>Exit at:</strong><br>{{ result.to_stop.name }}
+                            </p>
+                            <p class="mb-0">
+                                <i class="fas fa-road me-2 text-secondary"></i>
+                                <strong>Distance:</strong> {{ result.distance }} km
+                            </p>
+                        </div>
+                        <div class="col-6">
+                            <div class="card border-0 p-3 text-center h-100" style="background:#f0f4ff;">
+                                <small class="text-muted">Regular Fare</small>
+                                <h4 class="fw-bold text-primary mb-0">Rs. {{ result.regular_fare }}</h4>
+                                <hr class="my-2">
+                                {% if result.is_student %}
+                                    <small class="text-muted">Student Fare (45% off)</small>
+                                    <h4 class="fw-bold text-success mb-0">Rs. {{ result.student_fare }}</h4>
+                                    <small class="text-success">✅ Discount applied!</small>
+                                {% else %}
+                                    <small class="text-muted">🎓 Are you a student?</small><br>
+                                    <small class="text-muted">Select Yes above for discount</small>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
                     <p class="fw-bold mb-2">
                         <i class="fas fa-map-marker-alt me-2"></i>Stops on journey:
                     </p>
@@ -140,7 +175,6 @@
         attribution: '© OpenStreetMap contributors'
     }).addTo(map);
 
-    // Draw route lines
     data.routes.forEach(route => {
         L.polyline(route.coordinates, {
             color: route.color || 'blue',
@@ -149,7 +183,6 @@
         }).addTo(map).bindPopup(`<strong>${route.yatayat_name}</strong><br>${route.route_name}`);
     });
 
-    // Add stop markers
     data.stops.forEach(stop => {
         let color = '#1a237e';
         let label = stop.name;
@@ -174,7 +207,6 @@
             .bindPopup(`<strong>${label}</strong>`);
     });
 
-    // Fit map to show all route stops
     const allCoords = data.stops.map(s => [s.lat, s.lng]);
     if (allCoords.length > 1) {
         map.fitBounds(allCoords, {padding: [30, 30]});
