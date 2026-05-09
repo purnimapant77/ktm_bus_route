@@ -1,0 +1,104 @@
+{% extends 'bus/base.html' %}
+{% block title %}My Profile - KTM Bus Finder{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+
+            <!-- Profile Header -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center">
+                        <div class="rounded-circle text-white d-flex align-items-center justify-content-center me-4"
+                            style="width:80px;height:80px;min-width:80px;background:#1a237e;font-size:2rem;">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div>
+                            <h3 class="fw-bold mb-1">{{ user.username }}</h3>
+                            <p class="text-muted mb-1">
+                                <i class="fas fa-envelope me-2"></i>
+                                {{ user.email|default:"No email added" }}
+                            </p>
+                            <p class="text-muted mb-0">
+                                <i class="fas fa-calendar me-2"></i>
+                                Member since {{ user.date_joined|date:"F Y" }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Account Details -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header" style="background:#1a237e; color:white;">
+                    <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Account Details</h5>
+                </div>
+                <div class="card-body p-4">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="text-muted small">Username</label>
+                            <p class="fw-bold">{{ user.username }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="text-muted small">Email</label>
+                            <p class="fw-bold">{{ user.email|default:"Not provided" }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="text-muted small">Account Type</label>
+                            <p class="fw-bold">
+                                {% if user.is_staff %}
+                                <span class="badge bg-danger">Admin</span>
+                                {% else %}
+                                <span class="badge bg-primary">Regular User</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="text-muted small">Last Login</label>
+                            <p class="fw-bold">{{ user.last_login|date:"d M Y, h:i A" }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Links -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header" style="background:#1a237e; color:white;">
+                    <h5 class="mb-0"><i class="fas fa-bolt me-2"></i>Quick Actions</h5>
+                </div>
+                <div class="card-body p-4">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <a href="{% url 'search_route' %}" class="btn btn-outline-primary w-100 p-3">
+                                <i class="fas fa-search fa-2x mb-2 d-block"></i>
+                                Find Route
+                            </a>
+                        </div>
+                        <div class="col-md-4">
+                            <a href="{% url 'yatayat_routes' %}" class="btn btn-outline-success w-100 p-3">
+                                <i class="fas fa-route fa-2x mb-2 d-block"></i>
+                                Yatayat Routes
+                            </a>
+                        </div>
+                        <div class="col-md-4">
+                            <a href="{% url 'map_view' %}" class="btn btn-outline-danger w-100 p-3">
+                                <i class="fas fa-map fa-2x mb-2 d-block"></i>
+                                View Map
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Logout -->
+            <div class="text-center">
+                <a href="{% url 'logout' %}" class="btn btn-danger px-5">
+                    <i class="fas fa-sign-out-alt me-2"></i>Logout
+                </a>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}
