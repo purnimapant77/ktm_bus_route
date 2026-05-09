@@ -92,9 +92,9 @@
     // Initialize map centered on Kathmandu
     const map = L.map('map').setView([27.7172, 85.3240], 13);
 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap contributors'
-    }).addTo(map);
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+    attribution: '© OpenStreetMap contributors © CARTO'
+}).addTo(map);
 
     // Stop icon
     const stopIcon = L.divIcon({
