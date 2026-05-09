@@ -10,6 +10,9 @@
         body {
             background-color: #190d3e1c;
             font-family: 'Segoe UI', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
         }
         .navbar {
             background: linear-gradient(135deg, #306430, #283593);
@@ -93,7 +96,7 @@
     </div>
 </nav>
 
-<main>
+<main style="flex: 1;">
     {% if messages %}
     <div class="container mt-3">
         {% for message in messages %}
