@@ -27,47 +27,6 @@ This project is currently in early stage. The route and stop data is very limite
 - **Map** — Leaflet.js with OpenStreetMap and CartoCDN tiles
 - **Data Import** — Pandas, OdfPy (for reading ODS files)
 
-## Fare Structure
-
-As per Bagmati Province official fare list:
-
-| Distance | Fare |
-|---|---|
-| 0 - 5 km | Rs. 24 (charged Rs. 25) |
-| 5 - 10 km | Rs. 33 (charged Rs. 35) |
-| 10 - 15 km | Rs. 39 (charged Rs. 40) |
-| 15 - 20 km | Rs. 44 (charged Rs. 45) |
-| 20+ km | Rs. 50 |
-
-Fares are rounded up to the nearest Rs. 5 as conductors charge in multiples of 5.
-Student discount of 45% is applied before rounding.
-
-## Project Structure
-
-```
-ktm_bus_route/
-├── bus/                        # Main app
-│   ├── models.py               # Stop, Route, RouteStop, FavoriteRoute models
-│   ├── views.py                # All views including search and fare logic
-│   ├── urls.py                 # URL routing
-│   ├── admin.py                # Admin panel setup
-│   ├── templates/bus/          # HTML templates
-│   ├── static/bus/images/      # Static files and images
-│   └── management/commands/    # Custom import command
-│       └── import_data.py      # Imports stops and routes from ODS files
-├── accounts/                   # Authentication app
-│   ├── views.py                # Login, signup, logout, profile views
-│   ├── urls.py                 # Auth URL routing
-│   └── templates/accounts/     # Login, signup, profile templates
-├── config/                     # Project settings
-│   ├── settings.py
-│   └── urls.py
-├── data/                       # ODS data files (not pushed to GitHub)
-│   ├── stops.ods
-│   └── routes.ods
-└── manage.py
-```
-
 ## How to Run Locally
 
 1. Clone the repository
@@ -133,12 +92,3 @@ python manage.py runserver
 - Deploy online so anyone can access it
 - Add feature to report wrong information
 
-## Developer
-
-**Purnima** — BSc CSIT Student, Padmakanya Multiple Campus, Tribhuvan University, Kathmandu
-
-This project was built as a personal project to practice Django web development and solve a real problem for Kathmandu commuters.
-
----
-
-*If you know any bus routes or stops that are missing, feel free to contact through the website!*
