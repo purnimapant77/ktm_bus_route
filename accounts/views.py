@@ -72,4 +72,6 @@ def logout_view(request):
 
 @login_required
 def profile_view(request):
-    return render(request, 'accounts/profile.html')
+    from bus.models import FavoriteRoute
+    favorites = FavoriteRoute.objects.filter(user=request.user).order_by('-created_at')
+    return render(request, 'accounts/profile.html', {'favorites': favorites})

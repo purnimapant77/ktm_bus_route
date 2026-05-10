@@ -63,6 +63,21 @@
         </form>
     </div>
 
+    {% if user.is_authenticated and favorites %}
+    <div class="card border-0 shadow-sm p-3 mb-4" style="background:#fffde7;">
+        <h6 class="fw-bold mb-3"><i class="fas fa-star text-warning me-2"></i>Your Favorite Routes</h6>
+        <div class="d-flex flex-wrap gap-2">
+            {% for fav in favorites %}
+            <a href="?from={{ fav.from_stop.id }}&to={{ fav.to_stop.id }}"
+                class="btn btn-outline-warning btn-sm">
+                <i class="fas fa-map-marker-alt me-1"></i>
+                {{ fav.from_stop.name }} → {{ fav.to_stop.name }}
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
     {% if error %}
     <div class="alert alert-warning">
         <i class="fas fa-exclamation-triangle me-2"></i>{{ error }}
@@ -88,7 +103,23 @@
                         </h5>
                         <span class="badge bg-light text-dark">{{ result.route.route_id }}</span>
                     </div>
+                    
                     <small>{{ result.route.route_name }}</small>
+                </div>
+                {% if user.is_authenticated %}
+                <form method="POST" action="{% url 'save_favorite' %}" class="mt-2">
+                    {% csrf_token %}
+                    <input type="hidden" name="from_stop_id" value="{{ result.from_stop.id }}">
+                    <input type="hidden" name="to_stop_id" value="{{ result.to_stop.id }}">
+                    <button type="submit" class="btn btn-warning btn-sm">
+                        <i class="fas fa-star me-1"></i>Save Favorite
+                    </button>
+                </form>
+                {% else %}
+                <small class="text-warning mt-1 d-block">
+                    <a href="{% url 'login' %}" class="text-warning">Login</a> to save this route
+                </small>
+                {% endif %}
                 </div>
                 <div class="card-body">
 

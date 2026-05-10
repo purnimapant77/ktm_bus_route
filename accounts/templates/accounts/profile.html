@@ -90,6 +90,47 @@
                     </div>
                 </div>
             </div>
+            <!-- Favorite Routes -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header" style="background:#1a237e; color:white;">
+                    <h5 class="mb-0"><i class="fas fa-star me-2"></i>Favorite Routes</h5>
+                </div>
+                <div class="card-body p-4">
+                    {% if favorites %}
+                        {% for fav in favorites %}
+                        <div class="d-flex justify-content-between align-items-center mb-3 p-3 rounded" style="background:#f0f4ff;">
+                            <div>
+                                <i class="fas fa-map-marker-alt text-success me-2"></i>
+                                <strong>{{ fav.from_stop.name }}</strong>
+                                <i class="fas fa-arrow-right mx-2 text-muted"></i>
+                                <strong>{{ fav.to_stop.name }}</strong>
+                                <br>
+                                <small class="text-muted ms-4">Saved on {{ fav.created_at|date:"d M Y" }}</small>
+                            </div>
+                            <div class="d-flex gap-2">
+                                <a href="{% url 'search_route' %}?from={{ fav.from_stop.id }}&to={{ fav.to_stop.id }}"
+                                    class="btn btn-sm btn-primary">
+                                    <i class="fas fa-search"></i>
+                                </a>
+                                <a href="{% url 'remove_favorite' fav.id %}"
+                                    class="btn btn-sm btn-danger"
+                                    onclick="return confirm('Remove this favorite?')">
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center py-3">
+                            <i class="fas fa-star fa-3x text-muted mb-3"></i>
+                            <p class="text-muted">No favorite routes yet!</p>
+                            <a href="{% url 'search_route' %}" class="btn btn-primary">
+                                <i class="fas fa-search me-2"></i>Search a Route to Save
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
 
             <!-- Logout -->
             <div class="text-center">

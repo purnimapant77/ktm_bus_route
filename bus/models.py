@@ -36,3 +36,18 @@ class RouteStop(models.Model):
 
     def __str__(self):
         return f"{self.route} - Stop {self.stop_sequence}: {self.stop}"
+    
+    
+from django.contrib.auth.models import User
+
+class FavoriteRoute(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='favorites')
+    from_stop = models.ForeignKey(Stop, on_delete=models.CASCADE, related_name='favorite_from')
+    to_stop = models.ForeignKey(Stop, on_delete=models.CASCADE, related_name='favorite_to')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ['user', 'from_stop', 'to_stop']
+
+    def __str__(self):
+        return f"{self.user.username}: {self.from_stop.name} → {self.to_stop.name}"

@@ -9,4 +9,6 @@ urlpatterns = [
     path('about/', views.about_view, name='about'),
     path('contact/', views.contact_view, name='contact'),
     path('stops/', views.stops_list, name='stops_list'),
+    path('save-favorite/', views.save_favorite, name='save_favorite'),
+    path('remove-favorite/<int:favorite_id>/', views.remove_favorite, name='remove_favorite'),
 ]

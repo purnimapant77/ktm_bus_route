@@ -1,7 +1,9 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from .models import Stop, Route, RouteStop
 import json
 import math
+from django.contrib.auth.decorators import login_required
+from .models import Stop, Route, RouteStop, FavoriteRoute
 
 def calculate_distance(lat1, lng1, lat2, lng2):
     """Haversine formula - calculates real distance in km between two coordinates"""
@@ -47,10 +49,16 @@ def search_route(request):
     map_data = None
     is_student = False
 
-    if request.method == 'POST':
-        from_stop_id = request.POST.get('from_stop')
-        to_stop_id = request.POST.get('to_stop')
-        is_student = request.POST.get('is_student') == 'yes'
+    
+    if request.method == 'POST' or request.GET.get('from'):
+        if request.method == 'POST':
+            from_stop_id = request.POST.get('from_stop')
+            to_stop_id = request.POST.get('to_stop')
+            is_student = request.POST.get('is_student') == 'yes'
+        else:
+            from_stop_id = request.GET.get('from')
+            to_stop_id = request.GET.get('to')
+            is_student = False
 
         try:
             from_stop = Stop.objects.get(id=from_stop_id)
@@ -144,6 +152,9 @@ def search_route(request):
             error = "Invalid stop selected!"
 
     stops = Stop.objects.all().order_by('name')
+    favorites = []
+    if request.user.is_authenticated:
+        favorites = FavoriteRoute.objects.filter(user=request.user).order_by('-created_at')
     return render(request, 'bus/search.html', {
         'stops': stops,
         'results': results,
@@ -152,7 +163,9 @@ def search_route(request):
         'error': error,
         'map_data': map_data,
         'is_student': is_student,
+        'favorites': favorites,
     })
+
 
 
 def yatayat_routes(request):
@@ -233,3 +246,37 @@ def contact_view(request):
 def stops_list(request):
     stops = Stop.objects.all().order_by('name')
     return render(request, 'bus/stops.html', {'stops': stops})
+
+@login_required
+def save_favorite(request):
+    if request.method == 'POST':
+        from_stop_id = request.POST.get('from_stop_id')
+        to_stop_id = request.POST.get('to_stop_id')
+        from django.contrib import messages
+        try:
+            from_stop = Stop.objects.get(id=from_stop_id)
+            to_stop = Stop.objects.get(id=to_stop_id)
+            favorite, created = FavoriteRoute.objects.get_or_create(
+                user=request.user,
+                from_stop=from_stop,
+                to_stop=to_stop,
+            )
+            if created:
+                messages.success(request, f'Route saved! {from_stop.name} → {to_stop.name}')
+            else:
+                messages.info(request, 'This route is already in your favorites!')
+        except Stop.DoesNotExist:
+            messages.error(request, 'Invalid stop!')
+    return redirect('search_route')
+
+
+@login_required
+def remove_favorite(request, favorite_id):
+    from django.contrib import messages
+    try:
+        favorite = FavoriteRoute.objects.get(id=favorite_id, user=request.user)
+        favorite.delete()
+        messages.success(request, 'Route removed from favorites!')
+    except FavoriteRoute.DoesNotExist:
+        messages.error(request, 'Favorite not found!')
+    return redirect('profile')
