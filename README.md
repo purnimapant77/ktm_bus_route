@@ -1,5 +1,11 @@
 🌐 Live Site: https://purnimapant77.pythonanywhere.com
 
+## Screenshots
+
+![Home Page](screenshots/home.jpg)
+![Search Results](screenshots/search.jpg)
+![Map View](screenshots/map.jpg)
+
 # KTM Bus Route Finder 🚌
 
 A web application to help people in Kathmandu Valley find the right public bus for their journey.
@@ -91,6 +97,5 @@ python manage.py runserver
 - Add more routes and stops covering full Kathmandu Valley
 - Add bus schedule and frequency information
 - Mobile responsive improvements
-- Deploy online so anyone can access it
 - Add feature to report wrong information
 
