@@ -120,3 +120,9 @@ STATIC_URL = "static/"
 LOGIN_URL = '/accounts/login/'
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
+
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+ALLOWED_HOSTS = ['purnimapant77.pythonanywhere.com', 'localhost', '127.0.0.1']
+DEBUG = False
+import os
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'bus/static')]
