@@ -7,106 +7,198 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
+        * { box-sizing: border-box; }
+
         body {
-            background-color: #190d3e1c;
             font-family: 'Segoe UI', sans-serif;
+            background-color: #FDF6EC;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
         }
+
+        /* NAVBAR */
         .navbar {
-            background: linear-gradient(135deg, #306430, #283593);
-            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            background: #1C1008;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.4);
+            padding: 12px 0;
         }
         .navbar-brand {
             font-weight: 700;
-            font-size: 1.4rem;
-            color: white !important;
+            font-size: 1.3rem;
+            color: #F5C842 !important;
+            letter-spacing: 0.3px;
+        }
+        .navbar-toggler {
+            border-color: rgba(245,200,66,0.3);
+        }
+        .navbar-toggler-icon {
+            filter: invert(1);
         }
         .nav-link {
-            color: rgba(255,255,255,0.85) !important;
+            color: rgba(255,255,255,0.7) !important;
             font-weight: 500;
+            font-size: 0.88rem;
+            padding: 6px 10px !important;
+            border-radius: 6px;
+            transition: all 0.2s;
         }
         .nav-link:hover {
-            color: white !important;
+            color: #F5C842 !important;
+            background: rgba(245,200,66,0.08);
         }
+        .btn-signup {
+            background: #8B1A1A !important;
+            color: white !important;
+            border-radius: 20px !important;
+            font-size: 0.85rem !important;
+            padding: 5px 16px !important;
+            border: none !important;
+        }
+        .btn-signup:hover {
+            background: #a82020 !important;
+        }
+        .btn-login {
+            color: #F5C842 !important;
+            border: 0.5px solid rgba(245,200,66,0.3) !important;
+            border-radius: 20px !important;
+            font-size: 0.85rem !important;
+            padding: 5px 14px !important;
+        }
+
+        /* DROPDOWN */
+        .dropdown-menu {
+            background: #1C1008;
+            border: 0.5px solid #3a2a10;
+            border-radius: 10px;
+        }
+        .dropdown-item {
+            color: rgba(255,255,255,0.75);
+            font-size: 0.88rem;
+        }
+        .dropdown-item:hover {
+            background: rgba(245,200,66,0.1);
+            color: #F5C842;
+        }
+        .dropdown-divider {
+            border-color: #3a2a10;
+        }
+
+        /* CARDS */
+        .card {
+            border-radius: 14px !important;
+            border: 0.5px solid #e8ddd0 !important;
+        }
+
+        /* FOOTER */
         .footer {
-            background: #122f37;
-            color: rgba(255,255,255,0.8);
-            padding: 20px 0;
-            margin-top: 60px;
+            background: #1C1008;
+            color: rgba(255,255,255,0.7);
+            padding: 24px 0;
+            margin-top: auto;
+        }
+        .footer a {
+            color: #F5C842;
+            text-decoration: none;
+        }
+        .footer a:hover {
+            color: white;
+        }
+
+        /* MOBILE NAVBAR */
+        @media (max-width: 991px) {
+            .navbar-collapse {
+                background: #2a1a08;
+                border-radius: 10px;
+                padding: 12px;
+                margin-top: 10px;
+                border: 0.5px solid #3a2a10;
+            }
+            .nav-link {
+                border-bottom: 0.5px solid rgba(255,255,255,0.06);
+                padding: 10px 12px !important;
+                border-radius: 0;
+            }
+            .nav-link:last-child {
+                border-bottom: none;
+            }
+            .btn-signup, .btn-login {
+                margin-top: 6px;
+                display: inline-block;
+            }
         }
     </style>
     {% block extra_css %}{% endblock %}
 </head>
-<body >
+<body>
 
 <nav class="navbar navbar-expand-lg">
     <div class="container">
         <a class="navbar-brand" href="{% url 'home' %}">
             <i class="fas fa-bus me-2"></i>KTM Bus Finder
         </a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
-        <div class="collapse navbar-collapse" id="navbarNav"></div>
-        <ul class="navbar-nav ms-auto align-items-center">
-    <li class="nav-item">
-        <a class="nav-link" href="{% url 'home' %}"><i class="fas fa-home me-1"></i>Home</a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link" href="{% url 'search_route' %}"><i class="fas fa-search me-1"></i>Find Route</a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link" href="{% url 'yatayat_routes' %}"><i class="fas fa-route me-1"></i>Yatayat</a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link" href="{% url 'map_view' %}"><i class="fas fa-map me-1"></i>Map</a>
-    </li>
-    <li class="nav-item">
-    <a class="nav-link" href="{% url 'about' %}"><i class="fas fa-info-circle me-1"></i>About</a>
-</li>
-<li class="nav-item">
-    <a class="nav-link" href="{% url 'contact' %}"><i class="fas fa-envelope me-1"></i>Contact</a>
-</li>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto align-items-center gap-1">
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'home' %}"><i class="fas fa-home me-1"></i>Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'search_route' %}"><i class="fas fa-search me-1"></i>Find Route</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'yatayat_routes' %}"><i class="fas fa-route me-1"></i>Yatayat</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'map_view' %}"><i class="fas fa-map me-1"></i>Map</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'about' %}"><i class="fas fa-info-circle me-1"></i>About</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'contact' %}"><i class="fas fa-envelope me-1"></i>Contact</a>
+                </li>
 
-    {% if user.is_authenticated %}
-    <li class="nav-item dropdown ms-2">
-        <a class="nav-link dropdown-toggle text-white" href="#" data-bs-toggle="dropdown">
-            <i class="fas fa-user-circle me-1"></i>{{ user.username }}
-        </a>
-        <ul class="dropdown-menu dropdown-menu-end">
-            <li><a class="dropdown-item" href="{% url 'profile' %}">
-                <i class="fas fa-user me-2 text-primary"></i>My Profile
-            </a></li>
-            <li><hr class="dropdown-divider"></li>
-            <li><a class="dropdown-item" href="{% url 'logout' %}">
-                <i class="fas fa-sign-out-alt me-2 text-danger"></i>Logout
-            </a></li>
-        </ul>
-    </li>
-    {% else %}
-    <li class="nav-item ms-2">
-        <a class="nav-link" href="{% url 'login' %}">
-            <i class="fas fa-sign-in-alt me-1"></i>Login
-        </a>
-    </li>
-    <li class="nav-item ms-1">
-        <a class="btn btn-light btn-sm px-3" href="{% url 'signup' %}">
-            <i class="fas fa-user-plus me-1"></i>Sign Up
-        </a>
-    </li>
-    {% endif %}
-</ul>
-</div>
+                {% if user.is_authenticated %}
+                <li class="nav-item dropdown ms-2">
+                    <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown" style="color:#F5C842 !important;">
+                        <i class="fas fa-user-circle me-1"></i>{{ user.username }}
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" href="{% url 'profile' %}">
+                            <i class="fas fa-user me-2" style="color:#C8860A;"></i>My Profile
+                        </a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="{% url 'logout' %}">
+                            <i class="fas fa-sign-out-alt me-2 text-danger"></i>Logout
+                        </a></li>
+                    </ul>
+                </li>
+                {% else %}
+                <li class="nav-item ms-1">
+                    <a class="nav-link btn-login" href="{% url 'login' %}">
+                        <i class="fas fa-sign-in-alt me-1"></i>Login
+                    </a>
+                </li>
+                <li class="nav-item ms-1">
+                    <a class="nav-link btn-signup" href="{% url 'signup' %}">
+                        <i class="fas fa-user-plus me-1"></i>Sign Up
+                    </a>
+                </li>
+                {% endif %}
+            </ul>
+        </div>
     </div>
 </nav>
 
-<main style="flex: 1;">
+<main style="flex:1;">
     {% if messages %}
     <div class="container mt-3">
         {% for message in messages %}
-        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show shadow-sm" role="alert">
             {{ message }}
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
@@ -116,9 +208,26 @@
     {% block content %}{% endblock %}
 </main>
 
-<footer class="footer text-center">
+<footer class="footer">
     <div class="container">
-        <p class="mb-0"><i class="fas fa-bus me-2"></i>KTM Bus Route Finder &copy; 2025 | Made for Kathmandu</p>
+        <div class="row align-items-center">
+            <div class="col-md-6 text-center text-md-start mb-2 mb-md-0">
+                <strong style="color:#F5C842;">
+                    <i class="fas fa-bus me-2"></i>KTM Bus Route Finder
+                </strong>
+                <p class="mb-0 small mt-1" style="color:rgba(255,255,255,0.45);">
+                    Making Kathmandu commute easier
+                </p>
+            </div>
+            <div class="col-md-6 text-center text-md-end">
+                <a href="{% url 'about' %}" class="me-3">About</a>
+                <a href="{% url 'contact' %}" class="me-3">Contact</a>
+                <a href="{% url 'map_view' %}">Map</a>
+                <p class="mb-0 small mt-1" style="color:rgba(255,255,255,0.35);">
+                    &copy; 2025 Made for Kathmandu 🇳🇵
+                </p>
+            </div>
+        </div>
     </div>
 </footer>
 
