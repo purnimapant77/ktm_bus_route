@@ -1,48 +1,248 @@
 {% extends 'bus/base.html' %}
-{% load static %}
-{% block title %}Home - KTM Bus Finder{% endblock %}
+{% block title %}Find Route - KTM Bus Finder{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<style>
+    #search-map {
+        height: 500px;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+</style>
+{% endblock %}
 
 {% block content %}
-
-<div style="background: linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.55)), url('{% static 'bus/images/bus.jpg' %}') center/cover no-repeat; color: white; padding: 120px 0;">
-    <div class="container text-center">
-        <h1 class="display-4 fw-bold mb-3">
-            <i class="fas fa-bus me-3"></i>KTM Bus Route Finder
-        </h1>
-        <p class="lead mb-4">Find the right bus for your journey in Kathmandu</p>
-        <a href="{% url 'search_route' %}" class="btn btn-light btn-lg px-5">
-            <i class="fas fa-search me-2"></i>Find My Bus
-        </a>
-    </div>
-</div>
-
 <div class="container mt-5">
-    <div class="row text-center g-4">
-        <div class="col-md-4">
-            <div class="card border-0 shadow-sm p-4 h-100">
-                <i class="fas fa-search fa-3x text-primary mb-3"></i>
-                <h5>Find Route</h5>
-                <p class="text-muted">Select your starting and destination stop to find the right bus</p>
-                <a href="{% url 'search_route' %}" class="btn btn-primary mt-auto">Search Now</a>
+    <h2 class="mb-4"><i class="fas fa-search me-2 text-primary"></i>Find Your Bus</h2>
+
+    <div class="card border-0 shadow-sm p-4 mb-4">
+        <form method="POST">
+            {% csrf_token %}
+            <div class="row g-3 align-items-end">
+                <div class="col-md-4">
+                    <label class="form-label fw-bold">From Stop</label>
+                    <select name="from_stop" class="form-select form-select-lg" required>
+                        <option value="">-- Select Starting Stop --</option>
+                        {% for stop in stops %}
+                        <option value="{{ stop.id }}"
+                            {% if from_stop and from_stop.id == stop.id %}selected{% endif %}>
+                            {{ stop.name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label fw-bold">To Stop</label>
+                    <select name="to_stop" class="form-select form-select-lg" required>
+                        <option value="">-- Select Destination Stop --</option>
+                        {% for stop in stops %}
+                        <option value="{{ stop.id }}"
+                            {% if to_stop and to_stop.id == stop.id %}selected{% endif %}>
+                            {{ stop.name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label fw-bold">Student?</label>
+                    <select name="is_student" class="form-select form-select-lg">
+                        <option value="no" {% if not is_student %}selected{% endif %}>No</option>
+                        <option value="yes" {% if is_student %}selected{% endif %}>Yes 🎓</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary btn-lg w-100">
+                        <i class="fas fa-search me-1"></i>Search
+                    </button>
+                </div>
             </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card border-0 shadow-sm p-4 h-100">
-                <i class="fas fa-route fa-3x text-success mb-3"></i>
-                <h5>Browse Yatayat</h5>
-                <p class="text-muted">Browse all available Yatayat services and their routes</p>
-                <a href="{% url 'yatayat_routes' %}" class="btn btn-success mt-auto">View Routes</a>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card border-0 shadow-sm p-4 h-100">
-                <i class="fas fa-map-marker-alt fa-3x text-danger mb-3"></i>
-                <h5>{{ stops.count }} Stops</h5>
-                <p class="text-muted">Covering major stops across Kathmandu valley</p>
-                <a href="{% url 'stops_list' %}" class="btn btn-danger mt-auto">View Stops</a>
-            </div>
+            <small class="text-muted mt-2 d-block">
+                🎓 Student discount (45% off) applies with valid student uniform or ID card
+            </small>
+        </form>
+    </div>
+
+    {% if user.is_authenticated and favorites %}
+    <div class="card border-0 shadow-sm p-3 mb-4" style="background:#fffde7;">
+        <h6 class="fw-bold mb-3"><i class="fas fa-star text-warning me-2"></i>Your Favorite Routes</h6>
+        <div class="d-flex flex-wrap gap-2">
+            {% for fav in favorites %}
+            <a href="?from={{ fav.from_stop.id }}&to={{ fav.to_stop.id }}"
+                class="btn btn-outline-warning btn-sm">
+                <i class="fas fa-map-marker-alt me-1"></i>
+                {{ fav.from_stop.name }} → {{ fav.to_stop.name }}
+            </a>
+            {% endfor %}
         </div>
     </div>
-</div>
+    {% endif %}
 
+    {% if error %}
+    <div class="alert alert-warning">
+        <i class="fas fa-exclamation-triangle me-2"></i>{{ error }}
+    </div>
+    {% endif %}
+
+    {% if results %}
+    <div class="row g-4">
+
+        {# Left side - Results #}
+        <div class="col-md-6">
+            <h4 class="mb-3">
+                <i class="fas fa-bus me-2 text-success"></i>
+                {{ results|length }} bus found
+            </h4>
+
+            {% for result in results %}
+            <div class="card border-0 shadow-sm mb-3">
+                <div class="card-header text-white" style="background:#1a237e;">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            <i class="fas fa-bus me-2"></i>{{ result.route.yatayat_name }}
+                        </h5>
+                        <span class="badge bg-light text-dark">{{ result.route.route_id }}</span>
+                    </div>
+                    
+                    <small>{{ result.route.route_name }}</small>
+                </div>
+                {% if user.is_authenticated %}
+                <form method="POST" action="{% url 'save_favorite' %}" class="mt-2">
+                    {% csrf_token %}
+                    <input type="hidden" name="from_stop_id" value="{{ result.from_stop.id }}">
+                    <input type="hidden" name="to_stop_id" value="{{ result.to_stop.id }}">
+                    <button type="submit" class="btn btn-warning btn-sm">
+                        <i class="fas fa-star me-1"></i>Save Favorite
+                    </button>
+                </form>
+                {% else %}
+                <small class="text-warning mt-1 d-block">
+                    <a href="{% url 'login' %}" class="text-warning">Login</a> to save this route
+                </small>
+                {% endif %}
+                </div>
+                <div class="card-body">
+
+                    <div class="row mb-3">
+                        <div class="col-6">
+                            <p class="mb-2">
+                                <i class="fas fa-sign-in-alt me-2 text-success"></i>
+                                <strong>Board at:</strong><br>{{ result.from_stop.name }}
+                            </p>
+                            <p class="mb-2">
+                                <i class="fas fa-sign-out-alt me-2 text-danger"></i>
+                                <strong>Exit at:</strong><br>{{ result.to_stop.name }}
+                            </p>
+                            <p class="mb-0">
+                                <i class="fas fa-road me-2 text-secondary"></i>
+                                <strong>Distance:</strong> {{ result.distance }} km
+                            </p>
+                        </div>
+                        <div class="col-6">
+                            <div class="card border-0 p-3 text-center h-100" style="background:#f0f4ff;">
+                                <small class="text-muted">Regular Fare</small>
+                                <h4 class="fw-bold text-primary mb-0">Rs. {{ result.regular_fare }}</h4>
+                                <hr class="my-2">
+                                {% if result.is_student %}
+                                    <small class="text-muted">Student Fare (45% off)</small>
+                                    <h4 class="fw-bold text-success mb-0">Rs. {{ result.student_fare }}</h4>
+                                    <small class="text-success">✅ Discount applied!</small>
+                                {% else %}
+                                    <small class="text-muted">🎓 Are you a student?</small><br>
+                                    <small class="text-muted">Select Yes above for discount</small>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <p class="fw-bold mb-2">
+                        <i class="fas fa-map-marker-alt me-2"></i>Stops on journey:
+                    </p>
+                    <ol class="list-group list-group-numbered">
+                        {% for rs in result.stops_in_between %}
+                        <li class="list-group-item border-0 py-1
+                            {% if rs.stop == result.from_stop %}bg-success bg-opacity-10 fw-bold
+                            {% elif rs.stop == result.to_stop %}bg-danger bg-opacity-10 fw-bold
+                            {% endif %}">
+                            {{ rs.stop.name }}
+                            {% if rs.stop == result.from_stop %}
+                                <span class="badge bg-success ms-2">Board</span>
+                            {% endif %}
+                            {% if rs.stop == result.to_stop %}
+                                <span class="badge bg-danger ms-2">Exit</span>
+                            {% endif %}
+                        </li>
+                        {% endfor %}
+                    </ol>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        {# Right side - Map #}
+        <div class="col-md-6">
+            <h4 class="mb-3">
+                <i class="fas fa-map me-2 text-danger"></i>Route on Map
+            </h4>
+            <div id="search-map"></div>
+        </div>
+
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+{% if map_data %}
+<script>
+    const data = {{ map_data|safe }};
+
+    const map = L.map('search-map').setView(
+        [data.from_stop.lat, data.from_stop.lng], 14
+    );
+
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+    attribution: '© OpenStreetMap contributors © CARTO'
+}).addTo(map);
+    
+
+    data.routes.forEach(route => {
+        L.polyline(route.coordinates, {
+            color: route.color || 'blue',
+            weight: 5,
+            opacity: 0.8
+        }).addTo(map).bindPopup(`<strong>${route.yatayat_name}</strong><br>${route.route_name}`);
+    });
+
+    data.stops.forEach(stop => {
+        let color = '#1a237e';
+        let label = stop.name;
+
+        if (stop.is_from) {
+            color = '#2e7d32';
+            label += ' 🟢 Board here';
+        } else if (stop.is_to) {
+            color = '#c62828';
+            label += ' 🔴 Exit here';
+        }
+
+        const icon = L.divIcon({
+            html: `<div style="background:${color};width:14px;height:14px;border-radius:50%;border:2px solid white;box-shadow:0 2px 4px rgba(0,0,0,0.4);"></div>`,
+            iconSize: [14, 14],
+            iconAnchor: [7, 7],
+            className: ''
+        });
+
+        L.marker([stop.lat, stop.lng], {icon})
+            .addTo(map)
+            .bindPopup(`<strong>${label}</strong>`);
+    });
+
+    const allCoords = data.stops.map(s => [s.lat, s.lng]);
+    if (allCoords.length > 1) {
+        map.fitBounds(allCoords, {padding: [30, 30]});
+    }
+</script>
+{% endif %}
 {% endblock %}
